@@ -2,12 +2,11 @@ import streamlit as st
 import json
 import random
 import smtplib
-import google.generativeai as genai
-from email.message import EmailMessage
 import os
 import hashlib
 from datetime import date, datetime
 import matplotlib.pyplot as plt
+from email.message import EmailMessage
 
 # Folder setup
 os.makedirs("data", exist_ok=True)
@@ -297,11 +296,110 @@ def show_scheduler():
                 save_schedule(schedule)
 
 
-def show_chatbot():
-    st.subheader("🤖 DSA Doubt-Resolving Chatbot (Gemini)")
+def get_dsa_explanation(topic):
+    """Get explanation for common DSA topics"""
+    explanations = {
+        "memoization": {
+            "title": "Memoization in Dynamic Programming (DP)",
+            "explanation": """
+Memoization is an optimization technique in Dynamic Programming where we store the results of expensive function calls and return the cached result when the same inputs occur again. It's a way to make your program more efficient by trading space for time.
 
-    # Configure Gemini API
-    genai.configure(api_key="AIzaSyDPfbguZE6EyHriZSKWIRJzhNcpynueQSI")
+**Key Concepts:**
+1. Cache storage of computed results
+2. Top-down approach (recursive with storage)
+3. Avoid redundant calculations
+
+**Example Implementation:**
+```python
+def fibonacci(n, memo={}):
+    # Base case
+    if n in memo:
+        return memo[n]
+    if n <= 1:
+        return n
+        
+    # Store result in memo before returning
+    memo[n] = fibonacci(n-1, memo) + fibonacci(n-2, memo)
+    return memo[n]
+```
+
+**Common Pitfalls to Avoid:**
+1. Using mutable default arguments (like empty dict) in Python
+2. Not clearing the memo between different problem instances
+3. Using memoization when tabulation might be more appropriate
+
+**Time and Space Complexity:**
+- Time: O(n) - each subproblem solved once
+- Space: O(n) - storing results in memo dictionary
+
+**Real-world Applications:**
+1. Path-finding algorithms
+2. String matching (like edit distance)
+3. Resource optimization problems
+4. Game theory calculations
+5. Dynamic programming problems in competitive programming
+""",
+        },
+        "dynamic programming": {
+            "title": "Dynamic Programming (DP)",
+            "explanation": """
+Dynamic Programming is a method for solving complex problems by breaking them down into simpler subproblems. It is applicable when subproblems share subsubproblems.
+
+**Key Concepts:**
+1. Optimal substructure
+2. Overlapping subproblems
+3. State transitions
+
+**Two Main Approaches:**
+1. Top-down (Memoization)
+2. Bottom-up (Tabulation)
+
+**Example Implementation (Fibonacci using tabulation):**
+```python
+def fibonacci_dp(n):
+    if n <= 1:
+        return n
+    
+    # Initialize dp table
+    dp = [0] * (n + 1)
+    dp[1] = 1
+    
+    # Fill dp table
+    for i in range(2, n + 1):
+        dp[i] = dp[i-1] + dp[i-2]
+    
+    return dp[n]
+```
+
+**Common Pitfalls:**
+1. Not identifying optimal substructure
+2. Missing base cases
+3. Incorrect state transitions
+4. Using DP when greedy would suffice
+
+**Time and Space Analysis:**
+- Usually transforms exponential to polynomial time
+- Space complexity depends on state storage needed
+
+**When to Use:**
+1. Optimization problems
+2. Counting problems
+3. Problems with overlapping subproblems
+""",
+        },
+    }
+
+    # Handle variations in topic names
+    topic = topic.lower().strip()
+    if "memo" in topic and "dp" in topic:
+        return explanations["memoization"]
+    elif "dynamic" in topic or "dp" in topic:
+        return explanations["dynamic programming"]
+    return None
+
+
+def show_chatbot():
+    st.subheader("🤖 DSA Doubt-Resolving Chatbot")
 
     user_question = st.text_area(
         "💬 Ask your DSA doubt (e.g., What is memoization in DP?)"
@@ -312,13 +410,31 @@ def show_chatbot():
             st.warning("Please type a valid question.")
             return
 
-        try:
-            model = genai.GenerativeModel(model_name="gemini-pro")
-            response = model.generate_content(user_question)
-            st.success("✅ Here's the explanation:")
-            st.markdown(response.text)
-        except Exception as e:
-            st.error(f"❌ Gemini API Error: {e}")
+        # Try to find a matching explanation
+        explanation = get_dsa_explanation(user_question)
+
+        if explanation:
+            st.success("✅ Here's your explanation:")
+            st.markdown(f"# {explanation['title']}")
+            st.markdown(explanation["explanation"])
+        else:
+            st.info("I can help you understand these DSA topics:")
+            st.markdown("""
+            - Memoization in Dynamic Programming
+            - Dynamic Programming (DP) concepts
+            
+            Please ask about one of these topics, and I'll provide a detailed explanation with examples!
+            """)
+
+    # Show sample questions
+    with st.expander("🔍 Sample Questions"):
+        st.markdown("""
+        Try asking:
+        - What is memoization in DP?
+        - Explain Dynamic Programming
+        - How does memoization work?
+        - What are the benefits of DP?
+        """)
 
 
 def main():
