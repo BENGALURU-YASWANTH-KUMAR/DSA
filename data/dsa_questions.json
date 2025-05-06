@@ -1,116 +1,116 @@
 {
-    "Arrays": [
-      {
-        "question": "What is the time complexity of accessing an element in an array by index?",
-        "options": ["O(1)", "O(n)", "O(log n)", "O(n log n)"],
-        "answer": "O(1)",
-        "hint": "Think about how arrays use continuous memory.",
-        "explanation": "Array elements can be accessed in O(1) time because their memory addresses can be calculated directly using the index."
-      },
-      {
-        "question": "Which algorithm is best for finding the maximum subarray sum?",
-        "options": ["Kadane's Algorithm", "Binary Search", "Merge Sort", "DFS"],
-        "answer": "Kadane's Algorithm",
-        "hint": "It's a dynamic programming technique used on arrays.",
-        "explanation": "Kadane's Algorithm efficiently finds the subarray with the maximum sum in O(n) time by tracking the maximum subarray ending at each index."
-      },
-      {
-        "question": "What is the space complexity of the Merge Sort algorithm?",
-        "options": ["O(1)", "O(n)", "O(log n)", "O(n log n)"],
-        "answer": "O(n)",
-        "hint": "It uses additional memory to merge arrays.",
-        "explanation": "Merge Sort uses O(n) additional space for temporary arrays during the merge process."
-      },
-      {
-        "question": "Which sorting algorithm is stable?",
-        "options": ["Quick Sort", "Merge Sort", "Heap Sort", "Selection Sort"],
-        "answer": "Merge Sort",
-        "hint": "It maintains the order of equal elements.",
-        "explanation": "Merge Sort is stable as it doesn’t change the order of equal elements during merging."
-      },
-      {
-        "question": "How do you remove duplicates from a sorted array in-place?",
-        "options": ["Two-pointer approach", "Stack", "Binary Search", "DFS"],
-        "answer": "Two-pointer approach",
-        "hint": "Use one pointer to write and one to read.",
-        "explanation": "The two-pointer technique allows in-place duplicate removal by overwriting repeated values while iterating."
-      }
-    ],
-    "Dynamic Programming": [
-      {
-        "question": "Which of the following problems is best solved using DP?",
-        "options": ["0/1 Knapsack", "Binary Search", "Heap Sort", "BFS"],
-        "answer": "0/1 Knapsack",
-        "hint": "Look for overlapping subproblems and optimal substructure.",
-        "explanation": "DP is ideal for 0/1 Knapsack because it solves overlapping subproblems and stores intermediate results."
-      },
-      {
-        "question": "What is the time complexity of calculating Fibonacci using memoization?",
-        "options": ["O(n)", "O(n^2)", "O(log n)", "O(n log n)"],
-        "answer": "O(n)",
-        "hint": "Memoization avoids repeated calculations.",
-        "explanation": "Memoization stores previously calculated Fibonacci values, reducing time complexity from exponential to linear."
-      },
-      {
-        "question": "What does overlapping subproblems mean?",
-        "options": ["Same subproblems solved multiple times", "No subproblems", "Problems are dependent", "Parallel problems"],
-        "answer": "Same subproblems solved multiple times",
-        "hint": "Occurs when recursion solves the same input repeatedly.",
-        "explanation": "Overlapping subproblems mean the same function is called repeatedly with the same parameters in a recursive approach."
-      },
-      {
-        "question": "Which approach is used in Tabulation?",
-        "options": ["Bottom-up", "Top-down", "Recursion", "Backtracking"],
-        "answer": "Bottom-up",
-        "hint": "It builds the solution iteratively.",
-        "explanation": "Tabulation fills up a table by solving all subproblems from the base case upwards in a bottom-up manner."
-      },
-      {
-        "question": "LIS problem can be solved in O(n log n) using:",
-        "options": ["Binary Search + DP", "DFS", "Greedy", "Memoization only"],
-        "answer": "Binary Search + DP",
-        "hint": "Combine dynamic programming with a smart search.",
-        "explanation": "Using DP with binary search helps find the smallest tail values of increasing subsequences to reduce time complexity."
-      }
-    ],
-    "Graph": [
-      {
-        "question": "Which algorithm is used to detect cycle in an undirected graph?",
-        "options": ["DFS", "BFS", "Union-Find", "Dijkstra"],
-        "answer": "Union-Find",
-        "hint": "Think disjoint sets.",
-        "explanation": "Union-Find helps detect cycles by checking if two vertices are already connected in the same set."
-      },
-      {
-        "question": "Which algorithm finds the shortest path in a weighted graph?",
-        "options": ["Dijkstra", "DFS", "Topological Sort", "Prim"],
-        "answer": "Dijkstra",
-        "hint": "It uses a priority queue.",
-        "explanation": "Dijkstra's algorithm finds the shortest path from a source to all vertices in graphs with non-negative weights."
-      },
-      {
-        "question": "Which traversal uses a queue?",
-        "options": ["BFS", "DFS", "Inorder", "Postorder"],
-        "answer": "BFS",
-        "hint": "Think level-order traversal.",
-        "explanation": "Breadth-First Search uses a queue to visit all vertices level by level."
-      },
-      {
-        "question": "Topological sort is applicable to:",
-        "options": ["Directed Acyclic Graph", "Tree", "Undirected Graph", "Any Graph"],
-        "answer": "Directed Acyclic Graph",
-        "hint": "Think dependencies.",
-        "explanation": "Topological sort is only valid for DAGs where tasks must be ordered respecting dependencies."
-      },
-      {
-        "question": "What is the time complexity of DFS?",
-        "options": ["O(V + E)", "O(V^2)", "O(E)", "O(V log V)"],
-        "answer": "O(V + E)",
-        "hint": "Each node and edge is visited once.",
-        "explanation": "DFS visits each node and edge once, resulting in O(V + E) time complexity."
-      }
-    ],
-    "Linked List": [
+  "Arrays": [
+    {
+      "question": "What is the time complexity of accessing an element in an array by index?",
+      "options": ["O(1)", "O(n)", "O(log n)", "O(n log n)"],
+      "answer": "O(1)",
+      "hint": "Think about how arrays use continuous memory.",
+      "explanation": "Array elements can be accessed in O(1) time because their memory addresses can be calculated directly using the index."
+    },
+    {
+      "question": "Which algorithm is best for finding the maximum subarray sum?",
+      "options": ["Kadane's Algorithm", "Binary Search", "Merge Sort", "DFS"],
+      "answer": "Kadane's Algorithm",
+      "hint": "It's a dynamic programming technique used on arrays.",
+      "explanation": "Kadane's Algorithm efficiently finds the subarray with the maximum sum in O(n) time by tracking the maximum subarray ending at each index."
+    },
+    {
+      "question": "What is the space complexity of the Merge Sort algorithm?",
+      "options": ["O(1)", "O(n)", "O(log n)", "O(n log n)"],
+      "answer": "O(n)",
+      "hint": "It uses additional memory to merge arrays.",
+      "explanation": "Merge Sort uses O(n) additional space for temporary arrays during the merge process."
+    },
+    {
+      "question": "Which sorting algorithm is stable?",
+      "options": ["Quick Sort", "Merge Sort", "Heap Sort", "Selection Sort"],
+      "answer": "Merge Sort",
+      "hint": "It maintains the order of equal elements.",
+      "explanation": "Merge Sort is stable as it doesn’t change the order of equal elements during merging."
+    },
+    {
+      "question": "How do you remove duplicates from a sorted array in-place?",
+      "options": ["Two-pointer approach", "Stack", "Binary Search", "DFS"],
+      "answer": "Two-pointer approach",
+      "hint": "Use one pointer to write and one to read.",
+      "explanation": "The two-pointer technique allows in-place duplicate removal by overwriting repeated values while iterating."
+    }
+  ],
+  "Dynamic Programming": [
+    {
+      "question": "Which of the following problems is best solved using DP?",
+      "options": ["0/1 Knapsack", "Binary Search", "Heap Sort", "BFS"],
+      "answer": "0/1 Knapsack",
+      "hint": "Look for overlapping subproblems and optimal substructure.",
+      "explanation": "DP is ideal for 0/1 Knapsack because it solves overlapping subproblems and stores intermediate results."
+    },
+    {
+      "question": "What is the time complexity of calculating Fibonacci using memoization?",
+      "options": ["O(n)", "O(n^2)", "O(log n)", "O(n log n)"],
+      "answer": "O(n)",
+      "hint": "Memoization avoids repeated calculations.",
+      "explanation": "Memoization stores previously calculated Fibonacci values, reducing time complexity from exponential to linear."
+    },
+    {
+      "question": "What does overlapping subproblems mean?",
+      "options": ["Same subproblems solved multiple times", "No subproblems", "Problems are dependent", "Parallel problems"],
+      "answer": "Same subproblems solved multiple times",
+      "hint": "Occurs when recursion solves the same input repeatedly.",
+      "explanation": "Overlapping subproblems mean the same function is called repeatedly with the same parameters in a recursive approach."
+    },
+    {
+      "question": "Which approach is used in Tabulation?",
+      "options": ["Bottom-up", "Top-down", "Recursion", "Backtracking"],
+      "answer": "Bottom-up",
+      "hint": "It builds the solution iteratively.",
+      "explanation": "Tabulation fills up a table by solving all subproblems from the base case upwards in a bottom-up manner."
+    },
+    {
+      "question": "LIS problem can be solved in O(n log n) using:",
+      "options": ["Binary Search + DP", "DFS", "Greedy", "Memoization only"],
+      "answer": "Binary Search + DP",
+      "hint": "Combine dynamic programming with a smart search.",
+      "explanation": "Using DP with binary search helps find the smallest tail values of increasing subsequences to reduce time complexity."
+    }
+  ],
+  "Graph": [
+    {
+      "question": "Which algorithm is used to detect cycle in an undirected graph?",
+      "options": ["DFS", "BFS", "Union-Find", "Dijkstra"],
+      "answer": "Union-Find",
+      "hint": "Think disjoint sets.",
+      "explanation": "Union-Find helps detect cycles by checking if two vertices are already connected in the same set."
+    },
+    {
+      "question": "Which algorithm finds the shortest path in a weighted graph?",
+      "options": ["Dijkstra", "DFS", "Topological Sort", "Prim"],
+      "answer": "Dijkstra",
+      "hint": "It uses a priority queue.",
+      "explanation": "Dijkstra's algorithm finds the shortest path from a source to all vertices in graphs with non-negative weights."
+    },
+    {
+      "question": "Which traversal uses a queue?",
+      "options": ["BFS", "DFS", "Inorder", "Postorder"],
+      "answer": "BFS",
+      "hint": "Think level-order traversal.",
+      "explanation": "Breadth-First Search uses a queue to visit all vertices level by level."
+    },
+    {
+      "question": "Topological sort is applicable to:",
+      "options": ["Directed Acyclic Graph", "Tree", "Undirected Graph", "Any Graph"],
+      "answer": "Directed Acyclic Graph",
+      "hint": "Think dependencies.",
+      "explanation": "Topological sort is only valid for DAGs where tasks must be ordered respecting dependencies."
+    },
+    {
+      "question": "What is the time complexity of DFS?",
+      "options": ["O(V + E)", "O(V^2)", "O(E)", "O(V log V)"],
+      "answer": "O(V + E)",
+      "hint": "Each node and edge is visited once.",
+      "explanation": "DFS visits each node and edge once, resulting in O(V + E) time complexity."
+    }
+  ],
+  "Linked List": [
     {
       "question": "What is the time complexity to insert a node at the beginning of a singly linked list?",
       "options": ["O(1)", "O(n)", "O(log n)", "O(n log n)"],
@@ -294,8 +294,350 @@
       "hint": "There's no index in BST.",
       "explanation": "BST does not support random access by index like arrays. You must traverse to find elements."
     }
-  ]
-
-    
+  ],
+  "arrays": {
+    "name": "Arrays",
+    "description": "Foundation of data structures - learn array operations, manipulations, and patterns",
+    "topics": [
+      {
+        "name": "Basic Array Operations",
+        "youtube_tutorials": [
+          {
+            "title": "Complete Array Playlist by Striver",
+            "url": "https://www.youtube.com/watch?v=32Ll35mhWg0&list=PLgUwDviBIf0rPG3Ictpu74YWBQ1CaBkm2",
+            "creator": "Striver",
+            "duration": "10+ hours"
+          },
+          {
+            "title": "Arrays & ArrayLists - Java DSA Boot camp",
+            "url": "https://www.youtube.com/watch?v=n60Dn0UsbEk",
+            "creator": "Kunal Kushwaha",
+            "duration": "1.5 hours"
+          }
+        ],
+        "questions": [
+          {
+            "id": "array_1",
+            "question": "What is the time complexity of accessing an element in an array?",
+            "options": [
+              "O(1)",
+              "O(n)",
+              "O(log n)",
+              "O(n²)"
+            ],
+            "answer": "O(1)",
+            "explanation": "Array elements are stored in contiguous memory locations, allowing direct access through index in constant time O(1)",
+            "difficulty": "Easy",
+            "practice_links": [
+              {
+                "platform": "LeetCode",
+                "title": "Two Sum",
+                "url": "https://leetcode.com/problems/two-sum/",
+                "difficulty": "Easy"
+              }
+            ],
+            "video_solution": "https://www.youtube.com/watch?v=dRUpbt8vHpo"
+          }
+        ]
+      },
+      {
+        "name": "Sliding Window",
+        "youtube_tutorials": [
+          {
+            "title": "Sliding Window Technique - Striver",
+            "url": "https://www.youtube.com/watch?v=EHCGAZBbB88",
+            "creator": "Striver",
+            "duration": "45 minutes"
+          },
+          {
+            "title": "Sliding Window Algorithm - Complete Tutorial",
+            "url": "https://www.youtube.com/watch?v=BWE3QJpj3Bs",
+            "creator": "Aditya Verma",
+            "duration": "1 hour"
+          }
+        ],
+        "questions": [
+          {
+            "id": "sliding_1",
+            "question": "What is the main advantage of the sliding window technique?",
+            "options": [
+              "Reduces time complexity from O(n²) to O(n)",
+              "Makes the code shorter",
+              "Uses less memory",
+              "All of the above"
+            ],
+            "answer": "Reduces time complexity from O(n²) to O(n)",
+            "explanation": "Sliding window optimizes the solution by maintaining a window of elements and sliding it through the array, avoiding nested loops",
+            "difficulty": "Medium",
+            "practice_links": [
+              {
+                "platform": "LeetCode",
+                "title": "Maximum Subarray Sum",
+                "url": "https://leetcode.com/problems/maximum-subarray/",
+                "difficulty": "Medium"
+              }
+            ],
+            "video_solution": "https://www.youtube.com/watch?v=EHCGAZBbB88"
+          }
+        ]
+      }
+    ]
+  },
+  "dynamic_programming": {
+    "name": "Dynamic Programming",
+    "description": "Learn optimization technique for solving complex problems by breaking them down",
+    "topics": [
+      {
+        "name": "Introduction to DP",
+        "youtube_tutorials": [
+          {
+            "title": "Dynamic Programming Playlist",
+            "url": "https://www.youtube.com/watch?v=FfXoiwwnxFw&list=PLgUwDviBIf0qUlt5H_kiKYaNSqJ81PMMY",
+            "creator": "Striver",
+            "duration": "15+ hours"
+          },
+          {
+            "title": "DP Series by Aditya Verma",
+            "url": "https://www.youtube.com/watch?v=nqowUJzG-iM&list=PL_z_8CaSLPWekqhdCPmFohncHwz8TY2Go",
+            "creator": "Aditya Verma",
+            "duration": "10+ hours"
+          }
+        ],
+        "questions": [
+          {
+            "id": "dp_1",
+            "question": "What are the two key properties required for a problem to be solved using DP?",
+            "options": [
+              "Optimal Substructure and Overlapping Subproblems",
+              "Recursion and Iteration",
+              "Memoization and Tabulation",
+              "None of the above"
+            ],
+            "answer": "Optimal Substructure and Overlapping Subproblems",
+            "explanation": "DP is applicable when a problem can be broken down into smaller similar subproblems (Optimal Substructure) and these subproblems are solved multiple times (Overlapping Subproblems)",
+            "difficulty": "Medium",
+            "practice_links": [
+              {
+                "platform": "LeetCode",
+                "title": "Climbing Stairs",
+                "url": "https://leetcode.com/problems/climbing-stairs/",
+                "difficulty": "Easy"
+              }
+            ],
+            "video_solution": "https://www.youtube.com/watch?v=mLfjzJsN8us"
+          }
+        ]
+      }
+    ]
+  },
+  "sliding_window": {
+    "name": "Sliding Window Technique",
+    "description": "Learn the powerful sliding window pattern for array/string problems",
+    "topics": [
+      {
+        "name": "Introduction to Sliding Window",
+        "youtube_tutorials": [
+          {
+            "title": "Complete Sliding Window Tutorial - Striver",
+            "url": "https://www.youtube.com/watch?v=MTr7Q-f4t20",
+            "creator": "Striver",
+            "duration": "2.5 hours"
+          },
+          {
+            "title": "Sliding Window Master Class - Aditya Verma",
+            "url": "https://www.youtube.com/watch?v=EHCGAZBbB88&list=PL_z_8CaSLPWeM8BDJmIYDaoQ5zuwyxnfj",
+            "creator": "Aditya Verma",
+            "duration": "4+ hours"
+          }
+        ],
+        "questions": [
+          {
+            "id": "sw_1",
+            "question": "Which type of problems can be solved using sliding window?",
+            "options": [
+              "Array/String problems requiring analysis of contiguous subarrays",
+              "Tree traversal problems",
+              "Graph shortest path problems",
+              "Dynamic Programming problems"
+            ],
+            "answer": "Array/String problems requiring analysis of contiguous subarrays",
+            "explanation": "Sliding window is most effective for problems involving contiguous sequences in arrays or strings where we need to find a subarray meeting certain conditions.",
+            "difficulty": "Medium",
+            "practice_links": [
+              {
+                "platform": "LeetCode",
+                "title": "Maximum Sum Subarray of Size K",
+                "url": "https://leetcode.com/problems/maximum-sum-of-distinct-subarrays-with-length-k/",
+                "difficulty": "Medium"
+              },
+              {
+                "platform": "LeetCode",
+                "title": "Longest Substring Without Repeating Characters",
+                "url": "https://leetcode.com/problems/longest-substring-without-repeating-characters/",
+                "difficulty": "Medium"
+              }
+            ],
+            "video_solution": "https://www.youtube.com/watch?v=MTr7Q-f4t20"
+          }
+        ]
+      }
+    ]
+  },
+  "recursion": {
+    "name": "Recursion",
+    "description": "Master the art of solving problems using recursion",
+    "topics": [
+      {
+        "name": "Recursion Basics",
+        "youtube_tutorials": [
+          {
+            "title": "Complete Recursion Course - Kunal Kushwaha",
+            "url": "https://www.youtube.com/watch?v=M2uO2nMT0Bk",
+            "creator": "Kunal Kushwaha",
+            "duration": "3+ hours"
+          },
+          {
+            "title": "Recursion Masterclass - Striver",
+            "url": "https://www.youtube.com/watch?v=yVdKa8dnKiE&list=PLgUwDviBIf0rGlzIn_7rsaR2FQ5e6ZOL9",
+            "creator": "Striver",
+            "duration": "8+ hours"
+          }
+        ],
+        "questions": [
+          {
+            "id": "rec_1",
+            "question": "What are the two components of a recursive solution?",
+            "options": [
+              "Base case and Recursive case",
+              "Loop and Condition",
+              "Variable and Function",
+              "Input and Output"
+            ],
+            "answer": "Base case and Recursive case",
+            "explanation": "Every recursive solution must have a base case (stopping condition) and a recursive case (problem broken down into smaller subproblems).",
+            "difficulty": "Easy",
+            "practice_links": [
+              {
+                "platform": "LeetCode",
+                "title": "Fibonacci Number",
+                "url": "https://leetcode.com/problems/fibonacci-number/",
+                "difficulty": "Easy"
+              }
+            ],
+            "video_solution": "https://www.youtube.com/watch?v=M2uO2nMT0Bk"
+          }
+        ]
+      }
+    ]
+  },
+  "graphs": {
+    "name": "Graph Algorithms",
+    "description": "Master graph traversal, shortest paths, and network algorithms",
+    "topics": [
+      {
+        "name": "Graph Basics & Traversal",
+        "youtube_tutorials": [
+          {
+            "title": "Complete Graph Algorithms Course - Striver",
+            "url": "https://www.youtube.com/watch?v=YTtpfjGlH2M&list=PLgUwDviBIf0oE3gA41TKO2H5bHpPd7fzn",
+            "creator": "Striver",
+            "duration": "15+ hours"
+          },
+          {
+            "title": "Graph Theory Playlist - Abdul Bari",
+            "url": "https://www.youtube.com/watch?v=09_LlHjoEiY",
+            "creator": "Abdul Bari",
+            "duration": "7+ hours"
+          },
+          {
+            "title": "Graph Data Structure - Kunal Kushwaha",
+            "url": "https://www.youtube.com/watch?v=59fUtYYz7ZU",
+            "creator": "Kunal Kushwaha",
+            "duration": "2+ hours"
+          }
+        ],
+        "questions": [
+          {
+            "id": "graph_1",
+            "question": "Which algorithm should be used to find shortest path in an unweighted graph?",
+            "options": [
+              "BFS",
+              "DFS",
+              "Dijkstra's Algorithm",
+              "Bellman-Ford"
+            ],
+            "answer": "BFS",
+            "explanation": "BFS visits nodes level by level, guaranteeing the shortest path in terms of number of edges in an unweighted graph.",
+            "difficulty": "Medium",
+            "practice_links": [
+              {
+                "platform": "LeetCode",
+                "title": "Shortest Path in Binary Matrix",
+                "url": "https://leetcode.com/problems/shortest-path-in-binary-matrix/",
+                "difficulty": "Medium"
+              }
+            ],
+            "video_solution": "https://www.youtube.com/watch?v=YTtpfjGlH2M"
+          },
+          {
+            "id": "graph_2",
+            "question": "What data structure is used in Dijkstra's algorithm?",
+            "options": [
+              "Priority Queue (Min Heap)",
+              "Stack",
+              "Queue",
+              "Array"
+            ],
+            "answer": "Priority Queue (Min Heap)",
+            "explanation": "Priority Queue helps efficiently select the vertex with minimum distance in each iteration of Dijkstra's algorithm.",
+            "difficulty": "Hard",
+            "practice_links": [
+              {
+                "platform": "LeetCode",
+                "title": "Network Delay Time",
+                "url": "https://leetcode.com/problems/network-delay-time/",
+                "difficulty": "Medium"
+              }
+            ],
+            "video_solution": "https://www.youtube.com/watch?v=jbhuqIASjoM"
+          }
+        ]
+      },
+      {
+        "name": "Advanced Graph Algorithms",
+        "youtube_tutorials": [
+          {
+            "title": "Advanced Graph Algorithms - Striver",
+            "url": "https://www.youtube.com/watch?v=CpZh4eF8QBw",
+            "creator": "Striver",
+            "duration": "10+ hours"
+          }
+        ],
+        "questions": [
+          {
+            "id": "graph_adv_1",
+            "question": "Which algorithm is used to find minimum spanning tree?",
+            "options": [
+              "Kruskal's Algorithm",
+              "DFS",
+              "BFS",
+              "Floyd Warshall"
+            ],
+            "answer": "Kruskal's Algorithm",
+            "explanation": "Kruskal's algorithm uses Union-Find data structure to efficiently find the minimum spanning tree of a weighted graph.",
+            "difficulty": "Hard",
+            "practice_links": [
+              {
+                "platform": "LeetCode",
+                "title": "Min Cost to Connect All Points",
+                "url": "https://leetcode.com/problems/min-cost-to-connect-all-points/",
+                "difficulty": "Medium"
+              }
+            ],
+            "video_solution": "https://www.youtube.com/watch?v=1KRmCzBl_mQ"
+          }
+        ]
+      }
+    ]
   }
-  
+}

@@ -3,6 +3,132 @@
     "task": "i want to study array",
     "topic": "Arrays",
     "date": "2025-04-10",
-    "alert": true
+    "alert": true,
+    "recommended_path": [
+      {
+        "week": 1,
+        "topics": [
+          {
+            "name": "Arrays & Basic Algorithms",
+            "subtopics": ["Array Operations", "Linear Search", "Binary Search", "Two Pointer Technique"],
+            "estimated_hours": 10,
+            "resources": [
+              {
+                "type": "video",
+                "title": "Complete Arrays Course",
+                "url": "https://www.youtube.com/watch?v=32Ll35mhWg0&list=PLgUwDviBIf0rPG3Ictpu74YWBQ1CaBkm2",
+                "creator": "Striver"
+              }
+            ],
+            "practice_problems": [
+              {
+                "platform": "LeetCode",
+                "difficulty": "Easy",
+                "count": 5
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "week": 2,
+        "topics": [
+          {
+            "name": "Basic Data Structures",
+            "subtopics": ["Linked Lists", "Stacks", "Queues"],
+            "estimated_hours": 15,
+            "resources": [
+              {
+                "type": "video",
+                "title": "Linked List Complete Course",
+                "url": "https://www.youtube.com/watch?v=58YbpRDc4yw",
+                "creator": "Kunal Kushwaha"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "week": 3,
+        "topics": [
+          {
+            "name": "Searching and Sorting",
+            "subtopics": ["Merge Sort", "Quick Sort", "Advanced Binary Search"],
+            "estimated_hours": 12,
+            "resources": [
+              {
+                "type": "video",
+                "title": "Sorting Algorithms",
+                "url": "https://www.youtube.com/watch?v=HGk_ypEuS24",
+                "creator": "Striver"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "week": 4,
+        "topics": [
+          {
+            "name": "Trees and Recursion",
+            "subtopics": ["Binary Trees", "BST", "Tree Traversals", "Recursion Basics"],
+            "estimated_hours": 20,
+            "resources": [
+              {
+                "type": "video",
+                "title": "Tree Series",
+                "url": "https://www.youtube.com/watch?v=OIc0mHgHUww",
+                "creator": "Striver"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "week": 5,
+        "topics": [
+          {
+            "name": "Graph Algorithms",
+            "subtopics": ["Graph Representation", "BFS", "DFS", "Shortest Paths"],
+            "estimated_hours": 20,
+            "resources": [
+              {
+                "type": "video",
+                "title": "Complete Graph Series",
+                "url": "https://www.youtube.com/watch?v=YTtpfjGlH2M",
+                "creator": "Striver"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "week": 6,
+        "topics": [
+          {
+            "name": "Dynamic Programming",
+            "subtopics": ["Introduction to DP", "Memoization", "Tabulation", "Basic DP Problems"],
+            "estimated_hours": 25,
+            "resources": [
+              {
+                "type": "video",
+                "title": "Dynamic Programming Playlist",
+                "url": "https://www.youtube.com/watch?v=FfXoiwwnxFw&list=PLgUwDviBIf0qUlt5H_kiKYaNSqJ81PMMY",
+                "creator": "Striver"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "recommended_daily_hours": 2,
+    "recommended_weekly_hours": 10,
+    "tips": [
+      "Start with basics and build up gradually",
+      "Practice at least 2-3 problems daily",
+      "Watch video tutorials before attempting problems",
+      "Revise previous topics regularly",
+      "Take notes and implement code yourself"
+    ]
   }
 ]
