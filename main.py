@@ -7,6 +7,9 @@ import hashlib
 from datetime import date, datetime, timedelta
 import matplotlib.pyplot as plt
 from email.message import EmailMessage
+from dsa_assistant import DSAAssistant
+from auth.firebase_auth import FirebaseAuthHandler
+import sys
 
 # Folder setup
 os.makedirs("data", exist_ok=True)
@@ -15,6 +18,9 @@ os.makedirs("schedules", exist_ok=True)
 os.makedirs("auth", exist_ok=True)
 
 USER_FILE = "auth/users.json"
+
+# Initialize the DSA Assistant
+dsa_assistant = DSAAssistant()
 
 
 def hash_password(password):
@@ -33,39 +39,337 @@ def save_users(users):
         json.dump(users, f, indent=2)
 
 
+def initialize_session_state():
+    """Initialize or update session state variables"""
+    if "auth_state" not in st.session_state:
+        st.session_state.auth_state = {
+            "logged_in": False,
+            "user": None,
+            "loading": False,
+            "error": None,
+            "success": None,
+        }
+
+    # Check persisted auth state
+    if not st.session_state.auth_state["logged_in"]:
+        result = FirebaseAuthHandler.check_auth_state()
+        if result["success"] and result.get("authenticated"):
+            st.session_state.auth_state.update(
+                {"logged_in": True, "user": result["user"]}
+            )
+
+
+def show_auth_status():
+    """Display authentication status messages"""
+    if st.session_state.auth_state.get("loading"):
+        with st.spinner("Processing..."):
+            st.empty()
+    if st.session_state.auth_state.get("error"):
+        st.error(st.session_state.auth_state["error"])
+        st.session_state.auth_state["error"] = None
+    if st.session_state.auth_state.get("success"):
+        st.success(st.session_state.auth_state["success"])
+        st.session_state.auth_state["success"] = None
+
+
+def handle_auth_action(action, **kwargs):
+    """Handle authentication actions with proper state management"""
+    st.session_state.auth_state["loading"] = True
+    st.session_state.auth_state["error"] = None  # Clear previous error
+    st.session_state.auth_state["success"] = None # Clear previous success message
+
+    result = {} # Initialize result to ensure it's always defined
+
+    if action == "login":
+        result = FirebaseAuthHandler.sign_in(kwargs["email"], kwargs["password"])
+    elif action == "signup":
+        result = FirebaseAuthHandler.sign_up(
+            kwargs["username"],
+            kwargs["email"],
+            kwargs["password"],
+            kwargs["confirm_password"],
+        )
+    elif action == "google":
+        if "credential" in kwargs and kwargs["credential"]:
+            result = FirebaseAuthHandler.sign_in_with_google(kwargs["credential"])
+        else:
+            result = {"success": False, "error": "Google ID Token was not provided or is empty."}
+    elif action == "signout":
+        result = FirebaseAuthHandler.sign_out()
+    elif action == "reset_password":
+        result = FirebaseAuthHandler.reset_password(kwargs["email"])
+    # else: # Optional: handle unknown actions
+    #     result = {"success": False, "error": f"Unknown authentication action: {action}"}
+
+
+    st.session_state.auth_state["loading"] = False
+
+    if result.get("success"):
+        st.session_state.auth_state["success"] = result.get("message")
+        if action in ["login", "signup", "google"] and "user" in result:
+            st.session_state.auth_state.update(
+                {"logged_in": True, "user": result["user"]}
+            )
+            current_user = result["user"]
+            if action == "signup":
+                signup_form_username = kwargs.get("username")
+                if signup_form_username:
+                    st.session_state.username = signup_form_username
+                elif current_user.get("displayName"):
+                    st.session_state.username = current_user.get("displayName")
+                else:
+                    st.session_state.username = current_user.get("email") # Fallback to email
+            elif action == "login" or action == "google":
+                if current_user.get("displayName"):
+                    st.session_state.username = current_user.get("displayName")
+                else:
+                    st.session_state.username = current_user.get("email") # Fallback to email
+
+        elif action == "signout": # Explicitly handle signout state update
+            st.session_state.auth_state.update(
+                {"logged_in": False, "user": None}
+            )
+            if "username" in st.session_state:
+                del st.session_state.username
+            # Clear other session state variables related to user/quiz
+            keys_to_clear = ["quiz_index", "quiz_topic", "quiz_submitted", "shuffled_questions", "selected_option", "correct_count", "show_hint"]
+            for key in keys_to_clear:
+                if key in st.session_state:
+                    del st.session_state[key]
+        # For "reset_password", logged_in state doesn't change, only success/error message.
+    else:
+        # Ensure error is always a string, provide a default if not present in result
+        st.session_state.auth_state["error"] = result.get("error", "An unexpected authentication error occurred.")
+
+    # Always rerun to reflect changes in UI (e.g., show messages, update login status)
+    st.rerun()
+    # The 'return result' is effectively removed as st.rerun() stops execution.
+
+
 def auth_ui():
-    st.sidebar.subheader("\U0001f510 Login or Signup")
-    users = load_users()
-    action = st.sidebar.radio("Choose Action", ["Login", "Signup"])
+    st.sidebar.markdown(
+        """
+    <style>
+        .auth-container { 
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .auth-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .divider {
+            text-align: center;
+            margin: 15px 0;
+        }
+        .google-btn {
+            background-color: #fff;
+            color: #757575;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 5px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+    </style>
+    """,
+        unsafe_allow_html=True,
+    )
 
-    if action == "Signup":
-        new_user = st.sidebar.text_input("Create Username")
-        new_email = st.sidebar.text_input("Your Email")
-        new_pass = st.sidebar.text_input("Create Password", type="password")
-        if st.sidebar.button("Signup"):
-            if new_user in users:
-                st.sidebar.warning("Username already exists!")
-            else:
-                users[new_user] = {
-                    "password": hash_password(new_pass),
-                    "email": new_email,
-                }
-                save_users(users)
-                st.sidebar.success("Signup successful! Please login.")
-                st.rerun()
+    initialize_session_state()
+    show_auth_status()
 
-    elif action == "Login":
-        user = st.sidebar.text_input("Username")
-        passwd = st.sidebar.text_input("Password", type="password")
-        if st.sidebar.button("Login"):
-            if user in users and users[user]["password"] == hash_password(passwd):
-                st.session_state.logged_in = True
-                st.session_state.username = user
-                st.session_state.email = users[user]["email"]
-                st.success(f"Welcome, {user}!")
-                st.rerun()
-            else:
-                st.sidebar.error("Invalid credentials")
+    with st.sidebar:
+        st.markdown('<div class="auth-container">', unsafe_allow_html=True)
+
+        if not st.session_state.auth_state["logged_in"]:
+            action = st.radio(
+                "",
+                ["Login", "Sign Up", "Sign in with Phone"],
+                horizontal=True,
+                key="auth_action",
+            )
+
+            if action == "Sign Up":
+                st.markdown("### Create Account")
+                username = st.text_input("Username", key="signup_username")
+                email = st.text_input("Email", key="signup_email")
+                password = st.text_input(
+                    "Password", type="password", key="signup_password"
+                )
+                confirm_pass = st.text_input(
+                    "Confirm Password", type="password", key="signup_confirm"
+                )
+
+                st.markdown(
+                    """
+                <small>Password must contain:
+                - At least 8 characters
+                - One uppercase letter
+                - One lowercase letter
+                - One number
+                </small>
+                """,
+                    unsafe_allow_html=True,
+                )
+
+                if st.button("Create Account", use_container_width=True):
+                    handle_auth_action(
+                        "signup",
+                        username=username,
+                        email=email,
+                        password=password,
+                        confirm_password=confirm_pass,
+                    )
+
+            elif action == "Sign in with Phone":
+                st.markdown("### Sign in with Phone Number")
+                phone_number = st.text_input(
+                    "Phone Number (e.g., +11234567890)", key="phone_signin_number"
+                )
+
+                if (
+                    "otp_sent_to_phone" not in st.session_state
+                ):  # Initialize if not present
+                    st.session_state.otp_sent_to_phone = None
+                if "current_phone_for_otp" not in st.session_state:
+                    st.session_state.current_phone_for_otp = ""
+
+                if st.button(
+                    "Send OTP", key="phone_send_otp", use_container_width=True
+                ):
+                    if not phone_number:
+                        st.warning("Please enter a phone number.")
+                    else:
+                        st.info(
+                            "This is a placeholder for sending OTP. Firebase Phone Authentication typically requires client-side SDKs (like reCAPTCHA verifier) to initiate OTP sending. This button simulates the start of that process."
+                        )
+                        st.session_state.otp_sent_to_phone = True
+                        st.session_state.current_phone_for_otp = phone_number
+                        st.experimental_rerun()  # Rerun to show OTP field
+
+                if (
+                    st.session_state.otp_sent_to_phone
+                    and st.session_state.current_phone_for_otp == phone_number
+                ):
+                    verification_code = st.text_input(
+                        "Enter OTP received on "
+                        + st.session_state.current_phone_for_otp,
+                        key="phone_otp_code",
+                    )
+                    if st.button(
+                        "Verify OTP & Sign In",
+                        key="phone_verify_otp",
+                        use_container_width=True,
+                    ):
+                        if not verification_code:
+                            st.warning("Please enter the OTP.")
+                        else:
+                            result = FirebaseAuthHandler.sign_in_with_phone(
+                                st.session_state.current_phone_for_otp,
+                                "dummy_verification_id",  # This ID comes from the OTP sending step in a real Firebase flow
+                                verification_code,
+                            )
+                            if result["success"]:
+                                st.session_state.auth_state.update(
+                                    {"logged_in": True, "user": result["user"]}
+                                )
+                                firebase_user_obj = result["user"]
+                                if firebase_user_obj and isinstance(
+                                    firebase_user_obj, dict
+                                ):
+                                    email_from_user = firebase_user_obj.get("email")
+                                    if not email_from_user and firebase_user_obj.get(
+                                        "providerData"
+                                    ):
+                                        for provider in firebase_user_obj.get(
+                                            "providerData"
+                                        ):
+                                            if provider.get("email"):
+                                                email_from_user = provider.get("email")
+                                                break
+                                    st.session_state.email = (
+                                        email_from_user
+                                        if email_from_user
+                                        else st.session_state.current_phone_for_otp
+                                    )
+                                else:
+                                    st.session_state.email = (
+                                        st.session_state.current_phone_for_otp
+                                    )
+                                st.success(result["message"])
+                                st.session_state.otp_sent_to_phone = None
+                                st.session_state.current_phone_for_otp = ""
+                                st.experimental_rerun()
+                            else:
+                                st.error(result["error"])
+                elif (
+                    st.session_state.current_phone_for_otp != phone_number
+                    and st.session_state.otp_sent_to_phone
+                ):
+                    # Reset if phone number changed after OTP was "sent"
+                    st.session_state.otp_sent_to_phone = None
+                    st.session_state.current_phone_for_otp = ""
+
+            elif action == "Login":  # Changed from else to elif
+                st.markdown("### Welcome Back!")
+                # Google Sign-In Section
+                st.markdown("**Sign in with Google**")
+                google_id_token = st.text_input("Paste Google ID Token here", key="google_id_token_input", help="For testing backend logic. Obtain this token from a client-side Google Sign-In flow.")
+                
+                col1_google, col2_google = st.columns([1, 4])
+                with col1_google:
+                    st.image(
+                        "https://img.icons8.com/color/48/000000/google-logo.png",
+                        width=30,
+                    )
+                with col2_google:
+                    if st.button("Continue with Google", use_container_width=True, key="google_signin_button"):
+                        if google_id_token:
+                            handle_auth_action("google", credential=google_id_token)
+                        else:
+                            st.warning("Please paste the Google ID Token above to sign in with Google.")
+                        st.info(
+                            "Note: For a full user experience, a client-side Google Sign-In (e.g., JavaScript) is needed to obtain the ID token automatically. "
+                            "Also, ensure `YOUR_GOOGLE_WEB_CLIENT_ID` is configured in `auth/firebase_auth.py` for the `sign_in_with_google` method to function correctly with actual tokens."
+                        )
+
+                st.markdown('<div class="divider">or</div>', unsafe_allow_html=True)
+
+                email = st.text_input("Email", key="login_email")
+                password = st.text_input(
+                    "Password", type="password", key="login_password"
+                )
+
+                col1, col2 = st.columns([1, 1])
+                with col1:
+                    st.checkbox("Remember me")
+                with col2:
+                    if st.button("Forgot Password?"):
+                        forgot_email = st.text_input("Enter your email")
+                        if forgot_email and st.button("Send Reset Link"):
+                            handle_auth_action("reset_password", email=forgot_email)
+
+                if st.button("Sign In", use_container_width=True):
+                    handle_auth_action("login", email=email, password=password)
+
+        else:
+            # User is logged in
+            user = st.session_state.auth_state["user"]
+            if user:
+                st.markdown(f"""
+                ### 👋 Welcome!
+                You're signed in as **{user.get("displayName", user["email"])}**
+                """)
+                if st.button("Sign Out", use_container_width=True):
+                    handle_auth_action("signout")
+
+        st.markdown("</div>", unsafe_allow_html=True)
 
 
 def load_questions():
@@ -170,12 +474,14 @@ def quiz_interface(topic, questions):
     if (
         "quiz_index" not in st.session_state
         or st.session_state.get("quiz_topic") != topic
+        or "shuffled_questions" not in st.session_state  # Ensure initialization if missing
     ):
         st.session_state.quiz_index = 0
         st.session_state.quiz_topic = topic
         st.session_state.quiz_submitted = False
+        # Assuming 'questions' param is the list of questions for the topic
         st.session_state.shuffled_questions = random.sample(
-            questions["questions"], len(questions["questions"])
+            questions, len(questions)
         )
         st.session_state.selected_option = None
         st.session_state.correct_count = 0
@@ -481,239 +787,169 @@ def show_scheduler():
                 save_schedule(schedule)
 
 
-def get_dsa_explanation(topic):
-    """Get explanation for common DSA topics"""
-    explanations = {
-        "memoization": {
-            "title": "Memoization in Dynamic Programming (DP)",
-            "explanation": """
-Memoization is an optimization technique in Dynamic Programming where we store the results of expensive function calls and return the cached result when the same inputs occur again. It's a way to make your program more efficient by trading space for time.
-
-**Key Concepts:**
-1. Cache storage of computed results
-2. Top-down approach (recursive with storage)
-3. Avoid redundant calculations
-
-**Example Implementation:**
-```python
-def fibonacci(n, memo={}):
-    # Base case
-    if n in memo:
-        return memo[n]
-    if n <= 1:
-        return n
-        
-    # Store result in memo before returning
-    memo[n] = fibonacci(n-1, memo) + fibonacci(n-2, memo)
-    return memo[n]
-```
-
-**Common Pitfalls to Avoid:**
-1. Using mutable default arguments (like empty dict) in Python
-2. Not clearing the memo between different problem instances
-3. Using memoization when tabulation might be more appropriate
-
-**Time and Space Complexity:**
-- Time: O(n) - each subproblem solved once
-- Space: O(n) - storing results in memo dictionary
-
-**Real-world Applications:**
-1. Path-finding algorithms
-2. String matching (like edit distance)
-3. Resource optimization problems
-4. Game theory calculations
-5. Dynamic programming problems in competitive programming
-""",
-        },
-        "dynamic programming": {
-            "title": "Dynamic Programming (DP)",
-            "explanation": """
-Dynamic Programming is a method for solving complex problems by breaking them down into simpler subproblems. It is applicable when subproblems share subsubproblems.
-
-**Key Concepts:**
-1. Optimal substructure
-2. Overlapping subproblems
-3. State transitions
-
-**Two Main Approaches:**
-1. Top-down (Memoization)
-2. Bottom-up (Tabulation)
-
-**Example Implementation (Fibonacci using tabulation):**
-```python
-def fibonacci_dp(n):
-    if n <= 1:
-        return n
-    
-    # Initialize dp table
-    dp = [0] * (n + 1)
-    dp[1] = 1
-    
-    # Fill dp table
-    for i in range(2, n + 1):
-        dp[i] = dp[i-1] + dp[i-2]
-    
-    return dp[n]
-```
-
-**Common Pitfalls:**
-1. Not identifying optimal substructure
-2. Missing base cases
-3. Incorrect state transitions
-4. Using DP when greedy would suffice
-
-**Time and Space Analysis:**
-- Usually transforms exponential to polynomial time
-- Space complexity depends on state storage needed
-
-**When to Use:**
-1. Optimization problems
-2. Counting problems
-3. Problems with overlapping subproblems
-""",
-        },
-    }
-
-    # Handle variations in topic names
-    topic = topic.lower().strip()
-    if "memo" in topic and "dp" in topic:
-        return explanations["memoization"]
-    elif "dynamic" in topic or "dp" in topic:
-        return explanations["dynamic programming"]
-    return None
+def load_study_schedule():
+    with open("data/study_schedule.json", "r") as f:
+        return json.load(f)
 
 
-def show_chatbot():
-    st.subheader("🤖 DSA Doubt-Resolving Chatbot")
+def ask_dsa_questions():
+    st.header("Ask DSA Questions")
+    st.write("Need help with DSA concepts? Ask your questions here!")
 
-    user_question = st.text_area(
-        "💬 Ask your DSA doubt (e.g., What is memoization in DP?)"
-    )
+    user_question = st.text_area("Your DSA Question:")
 
-    if st.button("Ask Chatbot"):
-        if not user_question.strip():
-            st.warning("Please type a valid question.")
-            return
-
-        # Try to find a matching explanation
-        explanation = get_dsa_explanation(user_question)
-
-        if explanation:
-            st.success("✅ Here's your explanation:")
-            st.markdown(f"# {explanation['title']}")
-            st.markdown(explanation["explanation"])
+    if st.button("Get Answer"):
+        if user_question:
+            with st.spinner("Generating response..."):
+                response = dsa_assistant.generate_dsa_response(user_question)
+                st.markdown("### Answer:")
+                st.write(response)
         else:
-            st.info("I can help you understand these DSA topics:")
-            st.markdown("""
-            - Memoization in Dynamic Programming
-            - Dynamic Programming (DP) concepts
-            
-            Please ask about one of these topics, and I'll provide a detailed explanation with examples!
-            """)
+            st.warning("Please enter a question first!")
 
-    # Show sample questions
-    with st.expander("🔍 Sample Questions"):
-        st.markdown("""
-        Try asking:
-        - What is memoization in DP?
-        - Explain Dynamic Programming
-        - How does memoization work?
-        - What are the benefits of DP?
-        """)
+
+def view_history():
+    st.header("Previous Questions & Answers")
+    history = dsa_assistant.get_qa_history()
+
+    for qa in history:
+        st.subheader(
+            f"Question (asked on {qa['timestamp'].strftime('%Y-%m-%d %H:%M')})"
+        )
+        st.write(qa["question"])
+        st.markdown("**Answer:**")
+        st.write(qa["answer"])
+        st.divider()
+
+
+def display_menu():
+    print("\nDSA Study Bot - Menu")
+    print("1. Sign Up")
+    print("2. Sign In")
+    print("3. Sign Out")
+    print("4. Reset Password")
+    print("5. Start Study Session")
+    print("6. Exit")
+
+
+def handle_auth():
+    while True:
+        display_menu()
+        choice = input("\nEnter your choice (1-6): ")
+
+        if choice == "1":  # Sign Up
+            email = input("Enter email: ")
+            password = input("Enter password: ")
+            result = FirebaseAuthHandler.sign_up(email, password)
+            if result["success"]:
+                print("Successfully signed up!")
+            else:
+                print(f"Error signing up: {result['error']}")
+
+        elif choice == "2":  # Sign In
+            email = input("Enter email: ")
+            password = input("Enter password: ")
+            result = FirebaseAuthHandler.sign_in(email, password)
+            if result["success"]:
+                print("Successfully signed in!")
+                return True
+            else:
+                print(f"Error signing in: {result['error']}")
+
+        elif choice == "3":  # Sign Out
+            result = FirebaseAuthHandler.sign_out()
+            if result["success"]:
+                print("Successfully signed out!")
+            else:
+                print(f"Error signing out: {result['error']}")
+
+        elif choice == "4":  # Reset Password
+            email = input("Enter email: ")
+            result = FirebaseAuthHandler.reset_password(email)
+            if result["success"]:
+                print("Password reset email sent!")
+            else:
+                print(f"Error sending reset email: {result['error']}")
+
+        elif choice == "5":  # Start Study Session
+            user = FirebaseAuthHandler.get_current_user()
+            if user:
+                print("Starting study session...")
+                # Add your study session logic here
+            else:
+                print("Please sign in first!")
+
+        elif choice == "6":  # Exit
+            print("Goodbye!")
+            sys.exit()
+
+        else:
+            print("Invalid choice. Please try again.")
 
 
 def main():
-    st.set_page_config(page_title="DSA StudyBot", page_icon="📚", layout="wide")
-    st.title("📚 AI DSA StudyBot + Smart Tracker")
-
-    # Authentication
-    if "username" not in st.session_state:
-        auth_ui()
-        return
-
-    # Sidebar navigation
-    st.sidebar.title(f"Welcome, {st.session_state['username']}! 👋")
-    page = st.sidebar.radio(
-        "Navigate",
-        [
-            "Study Path",
-            "Practice Quiz",
-            "Progress Tracker",
-            "Study Scheduler",
-            "Ask DSA Doubt",
-        ],
-    )
-
-    if page == "Study Path":
-        st.header("🗺️ Your DSA Learning Journey")
-
-        # Load study path
-        with open("data/study_schedule.json", "r") as f:
-            study_data = json.load(f)
-
-        # Progress tracking
-        progress = load_progress()
-        today = str(date.today())
-        today_progress = progress.get(today, {})
-
-        col1, col2 = st.columns([2, 1])
-
-        with col1:
-            st.subheader("📚 Learning Path")
-            for week in study_data[0]["recommended_path"]:
-                with st.expander(
-                    f"Week {week['week']}: {week['topics'][0]['name']}",
-                    expanded=week["week"] == 1,
-                ):
-                    for topic in week["topics"]:
-                        st.markdown(f"""
-                        ### {topic["name"]}
-                        **Estimated Time:** {topic["estimated_hours"]} hours
-                        
-                        **Topics covered:**
-                        {", ".join(topic["subtopics"])}
-                        
-                        **Learning Resources:**
-                        """)
-                        for resource in topic.get("resources", []):
-                            st.markdown(
-                                f"- 📺 [{resource['title']}]({resource['url']}) by {resource['creator']}"
-                            )
-
-        with col2:
-            st.subheader("📊 Today's Progress")
-            if today_progress:
-                for topic, count in today_progress.items():
-                    st.metric(topic, f"{count} questions completed")
-            else:
-                st.info("No progress recorded today. Start learning! 🚀")
-
-            st.markdown("---")
-            st.markdown("### 💡 Study Tips")
-            for tip in study_data[0]["tips"]:
-                st.markdown(f"- {tip}")
-
-    elif page == "Practice Quiz":
-        st.header("🎯 Practice Quiz")
-        questions = load_questions()
-        topic = st.selectbox("Select Topic", list(questions.keys()))
-        if topic:
-            quiz_interface(topic, questions[topic])
-
-    elif page == "Progress Tracker":
-        show_progress()
-
-    elif page == "Study Scheduler":
-        show_scheduler()
-
-    else:  # Ask DSA Doubt
-        show_chatbot()
-
-    # Logout button
-    if st.sidebar.button("Logout"):
-        st.session_state.clear()
-        st.rerun()
+    print("Welcome to DSA Study Bot!")
+    handle_auth()
 
 
 if __name__ == "__main__":
-    main()
+    st.set_page_config(page_title="DSA Study Bot", page_icon="🤖", layout="wide", initial_sidebar_state="expanded")
+    
+    auth_ui() # Handles sidebar authentication and initializes session state
+
+    # Access logged_in state from auth_state, which should be managed by auth_ui
+    if st.session_state.get("auth_state", {}).get("logged_in"):
+        # Main content area
+        st.title("🤖 DSA Study Bot")
+
+        # Navigation in the sidebar (if not already part of auth_ui or if more items are needed)
+        page = st.sidebar.selectbox(
+            "Navigation",
+            [
+                "Practice DSA",
+                "Progress Tracker",
+                "Study Schedule",
+                "Ask Questions",
+                "History",
+            ],
+            key="main_navigation_selectbox" # Unique key for the selectbox
+        )
+
+        if page == "Practice DSA":
+            st.header("Practice DSA")
+            try:
+                # Ensure the path to dsa_questions.json is correct relative to main.py
+                # If main.py is in DSA-StudyBot and data is a subfolder, 'data/dsa_questions.json' is correct.
+                with open("data/dsa_questions.json", "r") as f:
+                    questions_data = json.load(f)
+                topic = st.selectbox("Select Topic", list(questions_data.keys()), key="dsa_topic_selectbox")
+                if topic:
+                    # Assuming quiz_interface is defined in this file (main.py)
+                    quiz_interface(topic, questions_data[topic]) 
+            except FileNotFoundError:
+                st.error("Error: The questions database (data/dsa_questions.json) was not found. Please ensure it exists.")
+            except json.JSONDecodeError:
+                st.error("Error: Could not decode the questions database. Please check the format of data/dsa_questions.json.")
+            except Exception as e:
+                st.error(f"An unexpected error occurred while loading DSA practice questions: {e}")
+
+        elif page == "Progress Tracker":
+            # Assuming show_progress is defined in this file (main.py)
+            show_progress()
+
+        elif page == "Study Schedule":
+            # Assuming show_scheduler is defined in this file (main.py)
+            show_scheduler()
+
+        elif page == "Ask Questions":
+            # Assuming ask_dsa_questions is defined in this file (main.py)
+            ask_dsa_questions()
+
+        elif page == "History":
+            # Assuming view_history is defined in this file (main.py)
+            view_history()
+    else:
+        # This content is shown in the main area if the user is not logged in.
+        # auth_ui handles the sidebar for login/signup.
+        st.title("🤖 Welcome to DSA Study Bot")
+        st.info("Please use the sidebar to Login or Sign Up to access the features.")
