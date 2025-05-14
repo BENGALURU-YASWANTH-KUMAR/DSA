@@ -7,7 +7,7 @@ import hashlib
 from datetime import date, datetime, timedelta
 import matplotlib.pyplot as plt
 from email.message import EmailMessage
-from dsa_assistant import DSAAssistant
+from dsa_assistant import DSAAssistant, DSA_CONCEPTS  # Import DSA_CONCEPTS
 from auth.firebase_auth import FirebaseAuthHandler
 import sys
 
@@ -76,9 +76,9 @@ def handle_auth_action(action, **kwargs):
     """Handle authentication actions with proper state management"""
     st.session_state.auth_state["loading"] = True
     st.session_state.auth_state["error"] = None  # Clear previous error
-    st.session_state.auth_state["success"] = None # Clear previous success message
+    st.session_state.auth_state["success"] = None  # Clear previous success message
 
-    result = {} # Initialize result to ensure it's always defined
+    result = {}  # Initialize result to ensure it's always defined
 
     if action == "login":
         result = FirebaseAuthHandler.sign_in(kwargs["email"], kwargs["password"])
@@ -93,14 +93,16 @@ def handle_auth_action(action, **kwargs):
         if "credential" in kwargs and kwargs["credential"]:
             result = FirebaseAuthHandler.sign_in_with_google(kwargs["credential"])
         else:
-            result = {"success": False, "error": "Google ID Token was not provided or is empty."}
+            result = {
+                "success": False,
+                "error": "Google ID Token was not provided or is empty.",
+            }
     elif action == "signout":
         result = FirebaseAuthHandler.sign_out()
     elif action == "reset_password":
         result = FirebaseAuthHandler.reset_password(kwargs["email"])
     # else: # Optional: handle unknown actions
     #     result = {"success": False, "error": f"Unknown authentication action: {action}"}
-
 
     st.session_state.auth_state["loading"] = False
 
@@ -118,28 +120,40 @@ def handle_auth_action(action, **kwargs):
                 elif current_user.get("displayName"):
                     st.session_state.username = current_user.get("displayName")
                 else:
-                    st.session_state.username = current_user.get("email") # Fallback to email
+                    st.session_state.username = current_user.get(
+                        "email"
+                    )  # Fallback to email
             elif action == "login" or action == "google":
                 if current_user.get("displayName"):
                     st.session_state.username = current_user.get("displayName")
                 else:
-                    st.session_state.username = current_user.get("email") # Fallback to email
+                    st.session_state.username = current_user.get(
+                        "email"
+                    )  # Fallback to email
 
-        elif action == "signout": # Explicitly handle signout state update
-            st.session_state.auth_state.update(
-                {"logged_in": False, "user": None}
-            )
+        elif action == "signout":  # Explicitly handle signout state update
+            st.session_state.auth_state.update({"logged_in": False, "user": None})
             if "username" in st.session_state:
                 del st.session_state.username
             # Clear other session state variables related to user/quiz
-            keys_to_clear = ["quiz_index", "quiz_topic", "quiz_submitted", "shuffled_questions", "selected_option", "correct_count", "show_hint"]
+            keys_to_clear = [
+                "quiz_index",
+                "quiz_topic",
+                "quiz_submitted",
+                "shuffled_questions",
+                "selected_option",
+                "correct_count",
+                "show_hint",
+            ]
             for key in keys_to_clear:
                 if key in st.session_state:
                     del st.session_state[key]
         # For "reset_password", logged_in state doesn't change, only success/error message.
     else:
         # Ensure error is always a string, provide a default if not present in result
-        st.session_state.auth_state["error"] = result.get("error", "An unexpected authentication error occurred.")
+        st.session_state.auth_state["error"] = result.get(
+            "error", "An unexpected authentication error occurred."
+        )
 
     # Always rerun to reflect changes in UI (e.g., show messages, update login status)
     st.rerun()
@@ -320,8 +334,12 @@ def auth_ui():
                 st.markdown("### Welcome Back!")
                 # Google Sign-In Section
                 st.markdown("**Sign in with Google**")
-                google_id_token = st.text_input("Paste Google ID Token here", key="google_id_token_input", help="For testing backend logic. Obtain this token from a client-side Google Sign-In flow.")
-                
+                google_id_token = st.text_input(
+                    "Paste Google ID Token here",
+                    key="google_id_token_input",
+                    help="For testing backend logic. Obtain this token from a client-side Google Sign-In flow.",
+                )
+
                 col1_google, col2_google = st.columns([1, 4])
                 with col1_google:
                     st.image(
@@ -329,11 +347,17 @@ def auth_ui():
                         width=30,
                     )
                 with col2_google:
-                    if st.button("Continue with Google", use_container_width=True, key="google_signin_button"):
+                    if st.button(
+                        "Continue with Google",
+                        use_container_width=True,
+                        key="google_signin_button",
+                    ):
                         if google_id_token:
                             handle_auth_action("google", credential=google_id_token)
                         else:
-                            st.warning("Please paste the Google ID Token above to sign in with Google.")
+                            st.warning(
+                                "Please paste the Google ID Token above to sign in with Google."
+                            )
                         st.info(
                             "Note: For a full user experience, a client-side Google Sign-In (e.g., JavaScript) is needed to obtain the ID token automatically. "
                             "Also, ensure `YOUR_GOOGLE_WEB_CLIENT_ID` is configured in `auth/firebase_auth.py` for the `sign_in_with_google` method to function correctly with actual tokens."
@@ -474,15 +498,14 @@ def quiz_interface(topic, questions):
     if (
         "quiz_index" not in st.session_state
         or st.session_state.get("quiz_topic") != topic
-        or "shuffled_questions" not in st.session_state  # Ensure initialization if missing
+        or "shuffled_questions"
+        not in st.session_state  # Ensure initialization if missing
     ):
         st.session_state.quiz_index = 0
         st.session_state.quiz_topic = topic
         st.session_state.quiz_submitted = False
         # Assuming 'questions' param is the list of questions for the topic
-        st.session_state.shuffled_questions = random.sample(
-            questions, len(questions)
-        )
+        st.session_state.shuffled_questions = random.sample(questions, len(questions))
         st.session_state.selected_option = None
         st.session_state.correct_count = 0
         st.session_state.show_hint = False
@@ -794,18 +817,77 @@ def load_study_schedule():
 
 def ask_dsa_questions():
     st.header("Ask DSA Questions")
-    st.write("Need help with DSA concepts? Ask your questions here!")
 
-    user_question = st.text_area("Your DSA Question:")
+    # Instructions and examples
+    with st.expander("📝 Tips for asking questions", expanded=False):
+        st.markdown("""
+        ### How to ask better questions:
+        1. **Be specific** - Instead of "What is DP?", ask "What is Dynamic Programming and how does it use memoization?"
+        2. **Include context** - Mention your current understanding or where you're stuck
+        3. **One concept at a time** - Focus on a single topic for clearer answers
+        
+        ### Example questions:
+        - "Explain the differences between BFS and DFS with examples"
+        - "What is the time complexity of quicksort and why?"
+        - "How does dynamic programming solve the knapsack problem?"
+        """)
 
-    if st.button("Get Answer"):
+    # Main question input
+    user_question = st.text_area(
+        "Your DSA Question:",
+        height=100,
+        help="Type your Data Structures and Algorithms question here",
+    )
+
+    col1, col2 = st.columns([1, 5])
+    with col1:
+        ask_button = st.button("Ask Question", use_container_width=True)
+    with col2:
         if user_question:
-            with st.spinner("Generating response..."):
+            st.markdown("*Press Enter/Return or click Ask Question to submit*")
+
+    # Question processing and answer display
+    if ask_button and user_question:
+        # Create a loading placeholder
+        answer_placeholder = st.empty()
+        with answer_placeholder.container():
+            with st.spinner("🤔 Thinking about your question..."):
                 response = dsa_assistant.generate_dsa_response(user_question)
-                st.markdown("### Answer:")
-                st.write(response)
-        else:
-            st.warning("Please enter a question first!")
+
+                if "error" in response.lower() or "quota" in response.lower():
+                    st.error(response)
+                    st.info("While waiting, you can:")
+                    st.markdown("""
+                    - Check the Practice DSA section for similar topics
+                    - Review your previous questions in History
+                    - Try our interactive quizzes
+                    """)
+                else:
+                    st.markdown("### 📚 Answer:")
+                    st.markdown(response)
+
+                    # Add helpful links if available
+                    relevant_resources = []
+                    for topic, content in DSA_CONCEPTS.items():
+                        if isinstance(content, dict) and "youtube_tutorials" in content:
+                            for tutorial in content["youtube_tutorials"]:
+                                if any(
+                                    word.lower() in user_question.lower()
+                                    for word in topic.lower().split()
+                                ):
+                                    relevant_resources.append(tutorial)
+
+                    if relevant_resources:
+                        st.markdown("### 🎓 Related Resources:")
+                        for resource in relevant_resources[
+                            :3
+                        ]:  # Show top 3 relevant resources
+                            st.markdown(
+                                f"- [{resource['title']}]({resource['url']}) by {resource['creator']}"
+                            )
+
+    elif ask_button:
+        st.warning("Please enter a question first!")
 
 
 def view_history():
@@ -893,9 +975,14 @@ def main():
 
 
 if __name__ == "__main__":
-    st.set_page_config(page_title="DSA Study Bot", page_icon="🤖", layout="wide", initial_sidebar_state="expanded")
-    
-    auth_ui() # Handles sidebar authentication and initializes session state
+    st.set_page_config(
+        page_title="DSA Study Bot",
+        page_icon="🤖",
+        layout="wide",
+        initial_sidebar_state="expanded",
+    )
+
+    auth_ui()  # Handles sidebar authentication and initializes session state
 
     # Access logged_in state from auth_state, which should be managed by auth_ui
     if st.session_state.get("auth_state", {}).get("logged_in"):
@@ -912,7 +999,7 @@ if __name__ == "__main__":
                 "Ask Questions",
                 "History",
             ],
-            key="main_navigation_selectbox" # Unique key for the selectbox
+            key="main_navigation_selectbox",  # Unique key for the selectbox
         )
 
         if page == "Practice DSA":
@@ -922,16 +1009,26 @@ if __name__ == "__main__":
                 # If main.py is in DSA-StudyBot and data is a subfolder, 'data/dsa_questions.json' is correct.
                 with open("data/dsa_questions.json", "r") as f:
                     questions_data = json.load(f)
-                topic = st.selectbox("Select Topic", list(questions_data.keys()), key="dsa_topic_selectbox")
+                topic = st.selectbox(
+                    "Select Topic",
+                    list(questions_data.keys()),
+                    key="dsa_topic_selectbox",
+                )
                 if topic:
                     # Assuming quiz_interface is defined in this file (main.py)
-                    quiz_interface(topic, questions_data[topic]) 
+                    quiz_interface(topic, questions_data[topic])
             except FileNotFoundError:
-                st.error("Error: The questions database (data/dsa_questions.json) was not found. Please ensure it exists.")
+                st.error(
+                    "Error: The questions database (data/dsa_questions.json) was not found. Please ensure it exists."
+                )
             except json.JSONDecodeError:
-                st.error("Error: Could not decode the questions database. Please check the format of data/dsa_questions.json.")
+                st.error(
+                    "Error: Could not decode the questions database. Please check the format of data/dsa_questions.json."
+                )
             except Exception as e:
-                st.error(f"An unexpected error occurred while loading DSA practice questions: {e}")
+                st.error(
+                    f"An unexpected error occurred while loading DSA practice questions: {e}"
+                )
 
         elif page == "Progress Tracker":
             # Assuming show_progress is defined in this file (main.py)
